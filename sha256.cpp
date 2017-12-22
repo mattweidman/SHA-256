@@ -11,7 +11,7 @@
 using namespace std;
 
 /** Returns the contents of the file at path [fileName]. */
-vector<unsigned char> getFileContents(string fileName) {
+string getFileContents(string fileName) {
   ifstream inFile;
 
   // open file
@@ -33,7 +33,7 @@ vector<unsigned char> getFileContents(string fileName) {
   inFile.close();
 
   // convert to vector
-  return vector<unsigned char>(buffer, buffer + bufLength / (sizeof 'a'));
+  return string(buffer);
 }
 
 /**
@@ -82,7 +82,7 @@ int rightRotate(unsigned int x, int shift) {
 
 /**
  * Hash one 64-byte chunk of data.
- * chunk: 64 bytes of data to be hashed
+ * data: 64 bytes of data to be hashed
  * hashes: 8 hash values from previous chunk (or initial hashes)
  * k: 64 round constants
  * returns: hash made of 8 ints
@@ -151,6 +151,45 @@ const vector<int>& hashes, const vector<int>& k) {
   return vector<int>(ansarr, ansarr+8);
 }
 
+/**
+ * Hash a list of 64-byte chunks of data.
+ * data: vectors of 64 bytes of data to be hashed
+ * hashes: initial 8 hashes
+ * k: 64 round constants
+ * returns: hash made of 8 ints
+ */
+vector<int> hashChunks(
+const vector<vector<unsigned char> >& data, 
+const vector<int>& hashes, const vector<int>& k) {
+  vector<int> hs(hashes);
+  for (int i=0; i<data.size(); i++) {
+    hs = hashChunk(data[i], hs, k);
+  }
+  return hs;
+}
+
+/**
+ * Takes the SHA-256 hash of a string.
+ */
+string hashSHA256(string s) {
+  // constants
+  vector<int> hv = hashValues();
+  vector<int> k = roundConstants(); 
+
+  // hash
+  vector<unsigned char> predata(s.begin(), s.end());
+  vector<unsigned char> data = preprocess(predata, 512);
+  vector<vector<unsigned char> > chunks = divideMessage(data, 64);
+  vector<int> hashes = hashChunks(chunks, hv, k);
+
+  // convert to string
+  ostringstream oss;
+  for (int i=0; i<hashes.size(); i++) {
+    oss << hex << hashes[i];
+  }
+  return oss.str();
+}
+
 /** Converts int to hexadecimal string. */
 string intToHexString(int x) {
   ostringstream s;
@@ -205,19 +244,7 @@ string charVector2DToString(const vector<vector<unsigned char> >& vs) {
 int main()
 {
   string fileName = "data.txt";
-  vector<unsigned char> buffer_pre = getFileContents(fileName);
-  vector<unsigned char> buffer = preprocess(buffer_pre, 512);
-  vector<vector<unsigned char> > chunks = divideMessage(buffer, 64);
-  vector<int> hv = hashValues();
-  vector<int> k = roundConstants();
-  cout << intVectorToString(hashChunk(chunks[0], hv, k)) << endl;
-  // vector<int> hs = hashValues();
-  // cout << intVectorToString(hs, 8) << endl;
-  // vector<int> rc = roundConstants();
-  // cout << intVectorToString(rc, 64) << endl;
-  // 0xb0000004 = 1011 0000 0000 0000 0000 0000 0000 0100
-  // cout << hex << rightRotate(0xb0000004U, 1) << endl; // 0x58.2
-  // cout << hex << rightRotate(0xb0000004U, 2) << endl; // 0x2c.1
-  // cout << hex << rightRotate(0xb0000004U, 3) << endl; // 0x96.0
-  // cout << hex << rightRotate(2, 2) << endl; // 0x80000000
+  string contents = getFileContents(fileName);
+  string hash = hashSHA256(contents);
+  cout << hash << endl;
 }
