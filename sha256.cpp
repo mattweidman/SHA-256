@@ -1,4 +1,4 @@
-/* Computes SHA-256 hash of file. */
+/** Computes SHA-256 hash of file. */
 
 #include <fstream>
 #include <iostream>

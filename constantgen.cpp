@@ -1,3 +1,5 @@
+/** Used for generating initial constants in SHA-256. */
+
 #include <math.h>
 #include <string.h>
 #include <string>

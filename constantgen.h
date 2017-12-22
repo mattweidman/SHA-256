@@ -1,3 +1,5 @@
+/** Used for generating initial constants in SHA-256. */
+
 #include <vector>
 
 /**
