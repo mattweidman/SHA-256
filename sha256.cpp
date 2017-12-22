@@ -89,43 +89,44 @@ int rightRotate(unsigned int x, int shift) {
  */
 vector<int> hashChunk(const vector<unsigned char>& data, 
 const vector<int>& hashes, const vector<int>& k) {
-  vector<int> w(64, 0);
+  vector<unsigned int> w(64, 0);
 
   // copy data into first 16 words of w
   for (int di=0; di<64; di++) {
     int wi = di / 4;
     int shift = (3 - (di % 4)) * 8;
-    int val = data[di] << shift;
-    w[wi] += val;
+    w[wi] += data[di] << shift;
   }
 
   // extend first 16 words into remaining 48 words
   for (int i=16; i<64; i++) {
-    int s0 = rightRotate(w[i-15], 7) ^ rightRotate(w[i-15], 18)
-      ^ rightRotate(w[i-15], 3);
-    int s1 = rightRotate(w[i-2], 17) ^ rightRotate(w[i-2], 19)
-      ^ rightRotate(w[i-2], 10);
+    unsigned int s0 = rightRotate(w[i-15], 7) 
+      ^ rightRotate(w[i-15], 18) ^ rightRotate(w[i-15], 3);
+    unsigned int s1 = rightRotate(w[i-2], 17) 
+      ^ rightRotate(w[i-2], 19) ^ rightRotate(w[i-2], 10);
     w[i] = w[i-16] + s0 + w[i-7] + s1;
   }
 
   // initialize a-h
-  int a = hashes[0],
-      b = hashes[1],
-      c = hashes[2],
-      d = hashes[3],
-      e = hashes[4],
-      f = hashes[5],
-      g = hashes[6],
-      h = hashes[7];
+  unsigned int a = hashes[0],
+    b = hashes[1],
+    c = hashes[2],
+    d = hashes[3],
+    e = hashes[4],
+    f = hashes[5],
+    g = hashes[6],
+    h = hashes[7];
   
   // compression
   for (int i=0; i<64; i++) {
-    int s1 = rightRotate(e, 6) ^ rightRotate(e, 11) ^ rightRotate(e, 25);
-    int ch = (e & f) ^ ((~e) & g);
-    int temp1 = h + s1 + ch + k[i] + w[i];
-    int s0 = rightRotate(a, 2) ^ rightRotate(a, 13) ^ rightRotate(a, 22);
-    int maj = (a & b) ^ (a & c) ^ (b & c);
-    int temp2 = s0 + maj;
+    unsigned int s1 = rightRotate(e, 6) ^ rightRotate(e, 11) 
+      ^ rightRotate(e, 25);
+    unsigned int ch = (e & f) ^ ((~e) & g);
+    unsigned int temp1 = h + s1 + ch + k[i] + w[i];
+    unsigned int s0 = rightRotate(a, 2) ^ rightRotate(a, 13) 
+      ^ rightRotate(a, 22);
+    unsigned int maj = (a & b) ^ (a & c) ^ (b & c);
+    unsigned int temp2 = s0 + maj;
 
     h = g;
     g = f;
