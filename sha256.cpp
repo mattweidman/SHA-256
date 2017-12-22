@@ -81,12 +81,14 @@ int rightRotate(unsigned int x, int shift) {
 }
 
 /**
- * Encrypt one 64-byte chunk of data.
- * chunk: 64 bytes of data to be encrypted
+ * Hash one 64-byte chunk of data.
+ * chunk: 64 bytes of data to be hashed
  * hashes: 8 hash values from previous chunk (or initial hashes)
+ * k: 64 round constants
+ * returns: hash made of 8 ints
  */
-vector<int> encryptChunk(const vector<unsigned char>& data, 
-const vector<int>& hashes) {
+vector<int> hashChunk(const vector<unsigned char>& data, 
+const vector<int>& hashes, const vector<int>& k) {
   vector<int> w(64, 0);
 
   // copy data into first 16 words of w
@@ -97,7 +99,56 @@ const vector<int>& hashes) {
     w[wi] += val;
   }
 
-  return w;
+  // extend first 16 words into remaining 48 words
+  for (int i=16; i<64; i++) {
+    int s0 = rightRotate(w[i-15], 7) ^ rightRotate(w[i-15], 18)
+      ^ rightRotate(w[i-15], 3);
+    int s1 = rightRotate(w[i-2], 17) ^ rightRotate(w[i-2], 19)
+      ^ rightRotate(w[i-2], 10);
+    w[i] = w[i-16] + s0 + w[i-7] + s1;
+  }
+
+  // initialize a-h
+  int a = hashes[0],
+      b = hashes[1],
+      c = hashes[2],
+      d = hashes[3],
+      e = hashes[4],
+      f = hashes[5],
+      g = hashes[6],
+      h = hashes[7];
+  
+  // compression
+  for (int i=0; i<64; i++) {
+    int s1 = rightRotate(e, 6) ^ rightRotate(e, 11) ^ rightRotate(e, 25);
+    int ch = (e & f) ^ ((~e) & g);
+    int temp1 = h + s1 + ch + k[i] + w[i];
+    int s0 = rightRotate(a, 2) ^ rightRotate(a, 13) ^ rightRotate(a, 22);
+    int maj = (a & b) ^ (a & c) ^ (b & c);
+    int temp2 = s0 + maj;
+
+    h = g;
+    g = f;
+    f = e;
+    e = d + temp1;
+    d = c;
+    c = b;
+    b = a;
+    a = temp1 + temp2;
+  }
+
+  // add compressed chunk to current hash value and return
+  int ansarr[8] = {
+    hashes[0] + a,
+    hashes[1] + b,
+    hashes[2] + c,
+    hashes[3] + d,
+    hashes[4] + e,
+    hashes[5] + f,
+    hashes[6] + g,
+    hashes[7] + h
+  };
+  return vector<int>(ansarr, ansarr+8);
 }
 
 /** Converts int to hexadecimal string. */
@@ -157,9 +208,9 @@ int main()
   vector<unsigned char> buffer_pre = getFileContents(fileName);
   vector<unsigned char> buffer = preprocess(buffer_pre, 512);
   vector<vector<unsigned char> > chunks = divideMessage(buffer, 64);
-  cout << charVector2DToString(chunks) << endl;
-  vector<int> dummy;
-  cout << intVectorToString(encryptChunk(chunks[0], dummy));
+  vector<int> hv = hashValues();
+  vector<int> k = roundConstants();
+  cout << intVectorToString(hashChunk(chunks[0], hv, k)) << endl;
   // vector<int> hs = hashValues();
   // cout << intVectorToString(hs, 8) << endl;
   // vector<int> rc = roundConstants();
