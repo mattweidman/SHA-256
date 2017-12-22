@@ -190,57 +190,6 @@ string hashSHA256(string s) {
   return oss.str();
 }
 
-/** Converts int to hexadecimal string. */
-string intToHexString(int x) {
-  ostringstream s;
-  s << hex << x;
-  return s.str();
-}
-
-/** Converts char to hexadecimal string. */
-string charToHexString(unsigned char x) {
-  ostringstream s;
-  s << hex << (int)x;
-  return s.str();
-}
-
-/**
- * Takes an array [i_1, i_2, ..., i_n] and length.
- * Returns the string "[i_1, i_2, ..., i_length]".
- */
-string intVectorToString(const vector<int>& arr) {
-  string ans = "[";
-  for (int i=0; i<arr.size(); i++) {
-    ans = ans + intToHexString(arr[i]);
-    if (i != arr.size()-1) ans += ", ";
-  }
-  return ans + "]";
-}
-
-/**
- * Takes an array [i_1, i_2, ..., i_n] and length.
- * Returns the string "[i_1, i_2, ..., i_length]".
- */
-string charVectorToString(const vector<unsigned char>& arr) {
-  string ans = "[";
-  for (int i=0; i<arr.size(); i++) {
-    ans = ans + charToHexString(arr[i]);
-    if (i != arr.size()-1) ans += ", ";
-  }
-  return ans + "]";
-}
-
-/**
- * Creates a string from a list of byte vectors
- */
-string charVector2DToString(const vector<vector<unsigned char> >& vs) {
-  string ans = "";
-  for (int i=0; i<vs.size(); i++) {
-    ans += charVectorToString(vs[i]) + "\n";
-  }
-  return ans;
-}
-
 int main(int argc, char* argv[])
 {
   if (argc != 2) {
