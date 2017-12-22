@@ -2,11 +2,11 @@
 
 #include <fstream>
 #include <iostream>
-#include <math.h>
-#include <sstream>
 #include <stdlib.h>
-#include <string.h>
-#include <string>
+#include <sstream>
+
+#include "constantgen.h"
+
 using namespace std;
 
 /** Returns the contents of the file at path [fileName]. */
@@ -33,61 +33,10 @@ char* getFileContents(const char* fileName) {
   return buffer;
 }
 
-/**
- * Computes x^(1/y) as a double, computes its fractional 
- * part + 1, and returns the first 32 bits of the significand.
- */
-int fractOfRoot(double x, double y) {
-  double s = pow(x, 1.0/y);
-  double fp = s - (int)s + 1.0;
-  long fplong = *(reinterpret_cast<long*>(&fp));
-  return fplong >> 20;
-}
-
-/**
- * Computes the list of prime numbers up to and including p
- * using the Sieve of Eratosthenes.
- */
-int* primesTo(int p) {
-  // create array of numbers 1 to p
-  bool* isPrime = new bool[p];
-  memset(isPrime, 1, p);
-
-  double sqrtp = sqrt(p);
-
-  // label each composite number
-  isPrime[0] = false;
-  for (int i=1; i<sqrtp; i++) {
-    int factor = i+1;
-    if (isPrime[i]) {
-      for (int j = i + factor; j < p; j += factor) {
-        isPrime[j] = false;
-      }
-    }
-  }
-
-  // get number of primes
-  int numPrimes = 0;
-  for (int i=0; i<p; i++) {
-    if (isPrime[i]) numPrimes++;
-  }
-
-  // create array of primes
-  int* primes = new int[numPrimes];
-  int j = 0;
-  for (int i=0; i<p; i++) {
-    if (isPrime[i]) {
-      primes[j] = i+1;
-      j++;
-    }
-  }
-  return primes;
-}
-
 /* Converts int to string. */
-string intToString(int x) {
+string intToHexString(int x) {
   ostringstream s;
-  s << x;
+  s << hex << x;
   return s.str();
 }
 
@@ -98,7 +47,7 @@ string intToString(int x) {
 string intArrToString(int* arr, int length) {
   string ans = "[";
   for (int i=0; i<length; i++) {
-    ans = ans + intToString(arr[i]);
+    ans = ans + intToHexString(arr[i]);
     if (i != length-1) ans += ", ";
   }
   return ans + "]";
@@ -108,6 +57,8 @@ int main()
 {
   // const char* fileName = "data.txt";
   // char* buffer = getFileContents(fileName);
-  int* primes = primesTo(311);
-  cout << intArrToString(primes, 64) << endl;
+  int* hs = hashValues();
+  cout << intArrToString(hs, 8) << endl;
+  int* rc = roundConstants();
+  cout << intArrToString(rc, 64) << endl;
 }
