@@ -1,6 +1,7 @@
 #include <math.h>
 #include <string.h>
 #include <string>
+#include <vector>
 using namespace std;
 
 /**
@@ -18,7 +19,7 @@ int fractOfRoot(double x, double y) {
  * Computes the list of prime numbers up to and including p
  * using the Sieve of Eratosthenes.
  */
-int* primesTo(int p) {
+vector<int> primesTo(int p) {
   // create array of numbers 1 to p
   bool* isPrime = new bool[p];
   memset(isPrime, 1, p);
@@ -36,20 +37,10 @@ int* primesTo(int p) {
     }
   }
 
-  // get number of primes
-  int numPrimes = 0;
+  // create vector of primes
+  vector<int> primes;
   for (int i=0; i<p; i++) {
-    if (isPrime[i]) numPrimes++;
-  }
-
-  // create array of primes
-  int* primes = new int[numPrimes];
-  int j = 0;
-  for (int i=0; i<p; i++) {
-    if (isPrime[i]) {
-      primes[j] = i+1;
-      j++;
-    }
+    if (isPrime[i]) primes.push_back(i+1);
   }
   return primes;
 }
@@ -59,12 +50,12 @@ int* primesTo(int p) {
  * the r roots of the first n primes.
  * Precondition: maxPrime is the nth prime.
  */
-int* genConstants(int n, int maxPrime, double r) {
-  int* primes = primesTo(maxPrime);
+vector<int> genConstants(int n, int maxPrime, double r) {
+  vector<int> primes = primesTo(maxPrime);
 
-  int* vals = new int[n];
+  vector<int> vals;
   for (int i=0; i<n; i++) {
-    vals[i] = fractOfRoot(primes[i], r);
+    vals.push_back(fractOfRoot(primes[i], r));
   }
   return vals;
 }
@@ -74,7 +65,7 @@ int* genConstants(int n, int maxPrime, double r) {
  * Same as the first 32 bits of the fractional parts of the
  * square roots of the first 8 primes 2..19.
  */
-int* hashValues() {
+vector<int> hashValues() {
   return genConstants(8, 19, 2);
 }
 
@@ -83,6 +74,6 @@ int* hashValues() {
  * Same as the first 32 bits of the fractional parts of the
  * cube roots of the first 64 primes.
  */
-int* roundConstants() {
+vector<int> roundConstants() {
   return genConstants(64, 311, 3);
 }
