@@ -241,10 +241,13 @@ string charVector2DToString(const vector<vector<unsigned char> >& vs) {
   return ans;
 }
 
-int main()
+int main(int argc, char* argv[])
 {
-  string fileName = "data.txt";
-  string contents = getFileContents(fileName);
-  string hash = hashSHA256(contents);
-  cout << hash << endl;
+  if (argc != 2) {
+    cout << "Wrong number of arguments: " << argc-1 << endl;
+    cout << "Requires name of file to be hashed" << endl;
+    exit(1);
+  }
+  string contents = getFileContents(argv[1]);
+  cout << hashSHA256(contents) << endl;
 }
